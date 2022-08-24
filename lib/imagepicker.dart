@@ -1,14 +1,20 @@
+import 'dart:developer';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:qrcodescanner/main.dart';
+import 'package:qrcodescanner/firebase_storage.dart';
 
 class AadhaarImagePicker extends StatefulWidget {
   final String btn;
-  const AadhaarImagePicker({Key? key, required this.btn}) : super(key: key);
+  final String fullname;
+  final String adharname;
+  const AadhaarImagePicker(
+      {Key? key,
+      required this.btn,
+      required this.adharname,
+      required this.fullname})
+      : super(key: key);
 
   @override
   State<AadhaarImagePicker> createState() => _AadhaarImagePickerState();
@@ -23,6 +29,7 @@ class _AadhaarImagePickerState extends State<AadhaarImagePicker> {
     super.initState();
   }
 
+  final Storage storage = Storage();
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -57,9 +64,12 @@ class _AadhaarImagePickerState extends State<AadhaarImagePicker> {
               setState(() {
                 image = temp;
               });
-
-              // String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-              //     "#ff6666", "Cancel", true, ScanMode.QR);
+              storage
+                  .uploadFile(
+                      filename: widget.adharname,
+                      filepath: val.path,
+                      name: widget.fullname)
+                  .then((value) => log('Done Upload'));
             },
             child: Text(widget.btn),
           ),
