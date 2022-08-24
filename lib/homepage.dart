@@ -179,6 +179,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                         btn: 'Upload Front',
                         adharname: 'Front',
                         fullname: fullname,
+                        metadata: AdhaarData,
                       ),
                       SizedBox(
                         width: 5,
@@ -187,6 +188,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                         btn: 'Upload Back',
                         adharname: 'Back',
                         fullname: fullname,
+                        metadata: AdhaarData,
                       ),
                     ],
                   ),

@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qrcodescanner/firebase_storage.dart';
+import 'package:qrcodescanner/modal/xml_modal.dart';
 
 class AadhaarImagePicker extends StatefulWidget {
   final String btn;
   final String fullname;
   final String adharname;
+  final PrintLetterBarcodeData? metadata;
   const AadhaarImagePicker(
       {Key? key,
       required this.btn,
       required this.adharname,
-      required this.fullname})
+      required this.fullname,
+      required this.metadata})
       : super(key: key);
 
   @override
@@ -68,7 +71,8 @@ class _AadhaarImagePickerState extends State<AadhaarImagePicker> {
                   .uploadFile(
                       filename: widget.adharname,
                       filepath: val.path,
-                      name: widget.fullname)
+                      name: widget.fullname,
+                      metadata: widget.metadata)
                   .then((value) => log('Done Upload'));
             },
             child: Text(widget.btn),
