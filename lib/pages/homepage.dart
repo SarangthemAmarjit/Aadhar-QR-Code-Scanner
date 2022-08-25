@@ -1,5 +1,7 @@
-import 'package:qrcodescanner/imagepicker.dart';
-
+import 'dart:developer';
+import 'package:qrcodescanner/refactor/imagepicker.dart';
+import 'package:qrcodescanner/services/localstorage.dart';
+import 'package:qrcodescanner/services/firebase_storage.dart';
 import 'package:qrcodescanner/modal/xml_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +30,20 @@ class BarcodeScannerApp extends StatefulWidget {
 class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
   PrintLetterBarcodeData? AdhaarData;
   String fullname = '';
+  final Storage storage = Storage();
+  String frontpath = '';
+  String backpath = '';
+  bool isLoading = false;
+
+  getpath() async {
+    var front = await DiskRepo().retrieve1();
+    var back = await DiskRepo().retrieve2();
+    setState(() {
+      frontpath = front;
+      backpath = back;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,22 +192,65 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       AadhaarImagePicker(
-                        btn: 'Upload Front',
-                        adharname: 'Front',
-                        fullname: fullname,
-                        metadata: AdhaarData,
+                        filepath: 'frontpath',
+                        Uploadname: 'Upload Front',
                       ),
                       SizedBox(
                         width: 5,
                       ),
                       AadhaarImagePicker(
-                        btn: 'Upload Back',
-                        adharname: 'Back',
-                        fullname: fullname,
-                        metadata: AdhaarData,
+                        filepath: 'backpath',
+                        Uploadname: 'Upload Back',
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        var front = await DiskRepo().retrieve1();
+                        var back = await DiskRepo().retrieve2();
+                        setState(() {
+                          frontpath = front;
+                          backpath = back;
+                        });
+
+                        storage
+                            .uploadFile(
+                                filename1: 'Front',
+                                frontpath: frontpath,
+                                name: fullname,
+                                metadata: AdhaarData,
+                                backpath: backpath,
+                                filename2: 'Back')
+                            .then((value) => log('Done Upload'));
+                        Future.delayed(const Duration(seconds: 6), () {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
+                      },
+                      child: isLoading
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Text(
+                                  'Uploading...',
+                                  style: TextStyle(fontSize: 17),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              ],
+                            )
+                          : const Text('Upload'))
                 ])));
   }
 }

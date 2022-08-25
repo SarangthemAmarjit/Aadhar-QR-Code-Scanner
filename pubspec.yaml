@@ -43,6 +43,7 @@ dependencies:
   image_cropper: ^3.0.0
   firebase_core: ^1.21.0
   firebase_storage: ^10.3.6
+  shared_preferences: ^2.0.15
 
 
 dev_dependencies:

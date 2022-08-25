@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:qrcodescanner/firebase_options.dart';
-import 'package:qrcodescanner/homepage.dart';
+import 'package:qrcodescanner/pages/homepage.dart';
 import 'package:flutter/material.dart';
 
 void main() async {

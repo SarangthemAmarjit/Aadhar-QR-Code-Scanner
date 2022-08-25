@@ -1,9 +1,6 @@
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
-
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:qrcodescanner/modal/xml_modal.dart';
 
@@ -12,11 +9,14 @@ class Storage {
       firebase_storage.FirebaseStorage.instance;
 
   Future<void> uploadFile(
-      {required String filepath,
-      required String filename,
+      {required String frontpath,
+      required String filename1,
+      required String backpath,
+      required String filename2,
       required String name,
       required PrintLetterBarcodeData? metadata}) async {
-    File file = File(filepath);
+    File file1 = File(frontpath);
+    File file2 = File(backpath);
     final newCustomMetadata = SettableMetadata(
       contentType: 'text/html',
       customMetadata: {
@@ -29,10 +29,11 @@ class Storage {
       },
     );
     try {
-      await storage.ref('Aadhaar/$name/$filename').putFile(file);
+      await storage.ref('Aadhaar/$name/$filename1').putFile(file1);
+      await storage.ref('Aadhaar/$name/$filename2').putFile(file2);
       await storage
           .ref('Aadhaar/$name/metadata.txt')
-          .putFile(file, newCustomMetadata);
+          .putFile(file1, newCustomMetadata);
     } on firebase_core.FirebaseException catch (e) {
       print(e);
     }
