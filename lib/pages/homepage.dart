@@ -6,6 +6,7 @@ import 'package:qrcodescanner/modal/xml_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
 
 class MyApp extends StatelessWidget {
@@ -35,16 +36,22 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
   String backpath = '';
   bool isLoading = false;
 
-  getpath() async {
-    var front = await DiskRepo().retrieve1();
-    var back = await DiskRepo().retrieve2();
-    setState(() {
-      frontpath = front;
-      backpath = back;
-    });
-  }
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
+  void initState() {
+    super.initState;
+    clear();
+  }
+
+  clear() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('frontpath') && prefs.containsKey('backpath')) {
+      prefs.remove('frontpath');
+      prefs.remove('backpath');
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Barcode Scanner')),
@@ -190,7 +197,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       AadhaarImagePicker(
                         filepath: 'frontpath',
                         Uploadname: 'Upload Front',
@@ -204,53 +211,72 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                       ),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
-                  ElevatedButton(
-                      onPressed: () async {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        var front = await DiskRepo().retrieve1();
-                        var back = await DiskRepo().retrieve2();
-                        setState(() {
-                          frontpath = front;
-                          backpath = back;
-                        });
-
-                        storage
-                            .uploadFile(
-                                filename1: 'Front',
-                                frontpath: frontpath,
-                                name: fullname,
-                                metadata: AdhaarData,
-                                backpath: backpath,
-                                filename2: 'Back')
-                            .then((value) => log('Done Upload'));
-                        Future.delayed(const Duration(seconds: 6), () {
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Color.fromRGBO(29, 194, 95, 1),
+                          minimumSize: Size.fromHeight(40),
+                          elevation: 5,
+                        ),
+                        onPressed: () async {
                           setState(() {
-                            isLoading = false;
+                            isLoading = true;
                           });
-                        });
-                      },
-                      child: isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Text(
-                                  'Uploading...',
-                                  style: TextStyle(fontSize: 17),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              ],
-                            )
-                          : const Text('Upload'))
+                          var front = await DiskRepo().retrieve1();
+                          var back = await DiskRepo().retrieve2();
+                          setState(() {
+                            frontpath = front;
+                            backpath = back;
+                          });
+
+                          storage
+                              .uploadFile(
+                                  filename1: 'Front',
+                                  frontpath: frontpath,
+                                  name: fullname,
+                                  metadata: AdhaarData,
+                                  backpath: backpath,
+                                  filename2: 'Back')
+                              .then((value) async {
+                            setState(() {
+                              isLoading = false;
+                            });
+                            log('Done Upload');
+                          });
+                        },
+                        child: isLoading
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text(
+                                    'Uploading...',
+                                    style: TextStyle(fontSize: 17),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.cloud_upload_outlined, size: 28),
+                                  SizedBox(width: 16),
+                                  Text(
+                                    "Upload File",
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.white),
+                                  ),
+                                ],
+                              )),
+                  )
                 ])));
   }
 }
