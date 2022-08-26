@@ -1,4 +1,7 @@
 import 'dart:developer';
+import 'package:flutter_dropdown_alert/alert_controller.dart';
+import 'package:flutter_dropdown_alert/dropdown_alert.dart';
+import 'package:flutter_dropdown_alert/model/data_alert.dart';
 import 'package:qrcodescanner/refactor/imagepicker.dart';
 import 'package:qrcodescanner/services/localstorage.dart';
 import 'package:qrcodescanner/services/firebase_storage.dart';
@@ -14,7 +17,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity),
+      builder: (context, child) => Stack(
+        children: [
+          child!,
+          DropdownAlert(
+            position: AlertPosition.BOTTOM,
+          )
+        ],
+      ),
       debugShowCheckedModeBanner: false,
       home: BarcodeScannerApp(),
     );
@@ -35,6 +49,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
   String frontpath = '';
   String backpath = '';
   bool isLoading = false;
+  Color btncolor = Color.fromARGB(255, 29, 76, 194);
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -42,6 +57,14 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
   void initState() {
     super.initState;
     clear();
+  }
+
+  void alerdial() {
+    AlertController.show(
+      " Scan QR Code First",
+      "And then Pick Images",
+      TypeAlert.warning,
+    );
   }
 
   clear() async {
@@ -197,10 +220,12 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       AadhaarImagePicker(
                         filepath: 'frontpath',
                         Uploadname: 'Upload Front',
+                        fullname: fullname,
+                        alertdialog: alerdial,
                       ),
                       SizedBox(
                         width: 5,
@@ -208,6 +233,8 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                       AadhaarImagePicker(
                         filepath: 'backpath',
                         Uploadname: 'Upload Back',
+                        fullname: fullname,
+                        alertdialog: alerdial,
                       ),
                     ],
                   ),
@@ -218,13 +245,14 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Color.fromRGBO(29, 194, 95, 1),
-                          minimumSize: Size.fromHeight(40),
+                          primary: btncolor,
+                          minimumSize: const Size.fromHeight(40),
                           elevation: 5,
                         ),
                         onPressed: () async {
                           setState(() {
                             isLoading = true;
+                            btncolor = Color.fromARGB(255, 62, 185, 66);
                           });
                           var front = await DiskRepo().retrieve1();
                           var back = await DiskRepo().retrieve2();
@@ -244,8 +272,26 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                               .then((value) async {
                             setState(() {
                               isLoading = false;
+                              btncolor = const Color.fromARGB(255, 29, 76, 194);
                             });
+                            // _displaySuccessMotionToast();
+                            AlertController.show(
+                              " Done Uploaded",
+                              "Successfully!",
+                              TypeAlert.success,
+                            );
                             log('Done Upload');
+                          }).onError((error, stackTrace) {
+                            setState(() {
+                              isLoading = false;
+                              btncolor = const Color.fromARGB(255, 29, 76, 194);
+                            });
+                            return AlertController.show(
+                              " No File Found",
+                              "Select the file first!",
+                              TypeAlert.error,
+                            );
+                            ;
                           });
                         },
                         child: isLoading
@@ -266,7 +312,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                               )
                             : Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: [
+                                children: const [
                                   Icon(Icons.cloud_upload_outlined, size: 28),
                                   SizedBox(width: 16),
                                   Text(
