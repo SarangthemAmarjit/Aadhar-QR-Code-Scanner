@@ -24,13 +24,13 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => Stack(
         children: [
           child!,
-          DropdownAlert(
+          const DropdownAlert(
             position: AlertPosition.BOTTOM,
           )
         ],
       ),
       debugShowCheckedModeBanner: false,
-      home: BarcodeScannerApp(),
+      home: const BarcodeScannerApp(),
     );
   }
 }
@@ -227,7 +227,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                         fullname: fullname,
                         alertdialog: alerdial,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
                       AadhaarImagePicker(
@@ -252,7 +252,7 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                         onPressed: () async {
                           setState(() {
                             isLoading = true;
-                            btncolor = Color.fromARGB(255, 62, 185, 66);
+                            btncolor = const Color.fromARGB(255, 62, 185, 66);
                           });
                           var front = await DiskRepo().retrieve1();
                           var back = await DiskRepo().retrieve2();
@@ -281,6 +281,11 @@ class _BarcodeScannerAppState extends State<BarcodeScannerApp> {
                               TypeAlert.success,
                             );
                             log('Done Upload');
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        super.widget));
                           }).onError((error, stackTrace) {
                             setState(() {
                               isLoading = false;
